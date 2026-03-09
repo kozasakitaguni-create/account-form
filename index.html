@@ -265,7 +265,7 @@ let formData = {};
 let selectedDepts = ["sales","cs","accounting","creative"];
 let showPw = {};
 
-let gasUrl = localStorage.getItem("gasUrl") || "";
+let gasUrl = "https://script.google.com/macros/s/AKfycbw2hc_AL7RlNva3a5K16KFV9vbr602DgPzA-jL0tIEZl8DY87BA1v6L6krqgMZPUw4e/exec";
 let deptEmails = {};
 try { deptEmails = JSON.parse(localStorage.getItem("deptEmails") || "{}"); } catch(e) {}
 
@@ -276,6 +276,9 @@ function init() {
   renderDeptChips();
   renderSalesFields();
   renderDeptEmailSettings();
+  // localStorageに保存されたURLがあれば上書き（管理者が設定変更した場合）
+  const savedUrl = localStorage.getItem("gasUrl");
+  if (savedUrl) gasUrl = savedUrl;
   document.getElementById("gasUrlInput").value = gasUrl;
   updateProgress();
 }
