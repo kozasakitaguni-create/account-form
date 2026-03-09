@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新規アカウント登録申請</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding: 20px 14px 60px;
+  }
+  .fi {
+    width: 100%; padding: 10px 13px; font-size: 14px;
+    background: #fff; border: 1.5px solid #d1d9e0;
+    border-radius: 8px; color: #1a202c; outline: none;
+    transition: border-color .18s, box-shadow .18s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .fi:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .fi.err  { border-color: #ef4444 !important; background: #fff5f5; }
+  .fi:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+  select.fi option { background: #fff; }
+  .lbl { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .badge-req  { background: #fee2e2; color: #dc2626; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 700; }
+  .badge-acct { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .badge-col  { background: #f1f5f9; color: #64748b; font-size: 10px; padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+  .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+  .err-msg { font-size: 11px; color: #ef4444; margin-top: 4px; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .section-hd { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .btn-blue { background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 12px 26px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .18s; font-family: 'Noto Sans JP', sans-serif; }
+  .btn-blue:hover { background: #1d4ed8; }
+  .btn-blue:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-ghost { background: #fff; color: #64748b; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 11px 22px; font-size: 13px; cursor: pointer; transition: all .18s; font-family: 'Noto Sans JP', sans-serif; }
+  .btn-ghost:hover { border-color: #94a3b8; color: #1e293b; }
+  .prog-bar { height: 5px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,#3b82f6,#06b6d4); transition: width .4s ease; }
+  .pw-wrap { position: relative; }
+  .pw-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: #94a3b8; padding: 4px; }
+  .dept-chip { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; cursor: pointer; margin-bottom: 7px; transition: all .15s; user-select: none; }
+  .dept-chip:hover { border-color: #93c5fd; }
+  .dept-chip.on { border-color: #3b82f6; background: #eff6ff; }
+  .chk { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; }
+  .chk.on { background: #2563eb; border-color: #2563eb; color: white; font-size: 10px; }
+  .confirm-row { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+  .cr-col { font-size: 11px; color: #94a3b8; font-family: monospace; width: 26px; flex-shrink: 0; }
+  .cr-lbl { font-size: 12px; color: #64748b; width: 148px; flex-shrink: 0; }
+  .cr-val { font-size: 13px; color: #1e293b; font-weight: 500; word-break: break-all; }
+  .cr-val.empty { color: #cbd5e1; font-style: italic; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 98; }
+  .drawer { position: fixed; top: 0; right: 0; width: 340px; max-width: 92vw; height: 100vh; background: #fff; border-left: 1px solid #e2e8f0; padding: 22px; overflow-y: auto; z-index: 99; box-shadow: -4px 0 24px rgba(0,0,0,0.1); transition: transform .28s ease; }
+  .success-ring { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #22c55e; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; animation: glow 2s ease-in-out infinite; }
+  @keyframes glow { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.3)} 50%{box-shadow:0 0 0 14px rgba(34,197,94,0)} }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .notice-box { padding: 12px 14px; border-radius: 8px; font-size: 12px; margin-top: 14px; }
+  .hidden { display: none; }
+
+  /* 販売先セレクト＋自由入力 */
+  .subsidiary-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .subsidiary-select-row { display: flex; gap: 8px; align-items: center; }
+  .subsidiary-select-row select { flex: 1; }
+  .other-badge { font-size: 11px; color: #7c3aed; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+  .autofill-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 6px; margin-top: 4px; }
+
+  @media(max-width:480px){ .grid2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<!-- 設定ドロワー -->
+<div class="overlay hidden" id="overlay" onclick="closeSettings()"></div>
+<div class="drawer" id="drawer" style="transform:translateX(105%)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <span style="font-weight:700;color:#1e293b;font-size:15px">⚙️ 送信設定</span>
+    <button class="btn-ghost" style="padding:5px 11px;font-size:12px" onclick="closeSettings()">✕ 閉じる</button>
+  </div>
+  <div style="margin-bottom:16px">
+    <div class="lbl">GAS WebアプリURL <span style="color:#ef4444;font-size:11px">*必須</span></div>
+    <input class="fi" type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="hint">Google Apps ScriptをデプロイしたURLを入力してください</div>
+  </div>
+  <div style="height:1px;background:#f1f5f9;margin:16px 0"></div>
+  <div style="font-size:11px;font-weight:700;color:#3b82f6;letter-spacing:.1em;margin-bottom:12px">部署・通知メール設定</div>
+  <div id="deptEmailSettings"></div>
+  <button class="btn-blue" style="width:100%;margin-top:8px" onclick="saveSettings()">設定を保存</button>
+  <div class="hint" style="margin-top:8px;text-align:center">設定はこのブラウザに保存されます</div>
+</div>
+
+<!-- メインコンテンツ -->
+<div style="max-width:640px;margin:0 auto">
+
+  <!-- ヘッダー -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+    <div>
+      <div style="font-size:10px;letter-spacing:.14em;color:#3b82f6;font-weight:700;margin-bottom:4px">SALES PORTAL</div>
+      <h1 style="font-size:21px;font-weight:700;color:#1e293b">新規アカウント登録申請</h1>
+      <div style="font-size:12px;color:#94a3b8;margin-top:3px">登録後、各部署へ自動通知・スプレッドシートに追記されます</div>
+    </div>
+    <button class="btn-ghost" style="font-size:12px;padding:8px 14px;flex-shrink:0" onclick="openSettings()">⚙️ 設定</button>
+  </div>
+
+  <!-- ━━━ 入力フォーム ━━━ -->
+  <div id="view-form">
+
+    <!-- 進捗 -->
+    <div class="card" style="padding:14px 18px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;color:#64748b">必須項目の入力状況</span>
+        <span id="progressLabel" style="font-size:12px;font-weight:700;color:#3b82f6">0 / 8 完了</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+
+    <!-- 通知先 -->
+    <div class="card">
+      <div class="section-hd" style="color:#64748b">📢 通知先部署</div>
+      <div id="deptChips"></div>
+    </div>
+
+    <!-- 営業入力フィールド -->
+    <div class="card">
+      <div class="section-hd" style="color:#16a34a">
+        <span style="background:#dcfce7;color:#16a34a;border-radius:4px;padding:2px 8px;font-size:10px">営業入力</span>
+        アカウント情報
+      </div>
+      <div id="salesFields" style="display:flex;flex-direction:column;gap:15px"></div>
+    </div>
+
+    <!-- 経理列（表示のみ） -->
+    <div class="card" style="border:1.5px dashed #bfdbfe">
+      <div class="section-hd" style="color:#3b82f6">
+        <span style="background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:4px;padding:2px 8px;font-size:10px">経理入力</span>
+        経理が後から入力する項目
+      </div>
+      <div class="grid2">
+        <div><div class="lbl"><span class="badge-col">F</span>サブドメイン1<span class="badge-acct">経理</span></div><input class="fi" value="（経理が入力）" disabled></div>
+        <div><div class="lbl"><span class="badge-col">H</span>サブドメイン3<span class="badge-acct">経理</span></div><input class="fi" value="（経理が入力）" disabled></div>
+        <div><div class="lbl"><span class="badge-col">I</span>ファイル名<span class="badge-acct">経理</span></div><input class="fi" value="（経理が入力）" disabled></div>
+        <div><div class="lbl"><span class="badge-col">L</span>手数料<span class="badge-acct">経理</span></div><input class="fi" value="（経理が入力）" disabled></div>
+      </div>
+    </div>
+
+    <!-- エラー表示 -->
+    <div id="globalError" class="notice-box hidden" style="background:#fff5f5;border:1px solid #fecaca;color:#dc2626">
+      ⚠ 未入力の必須項目があります。赤くなっている項目を確認してください。
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button class="btn-blue" onclick="goConfirm()">入力内容を確認する →</button>
+    </div>
+  </div>
+
+  <!-- ━━━ 確認画面 ━━━ -->
+  <div id="view-confirm" class="hidden">
+    <div class="card">
+      <div class="section-hd" style="color:#1e293b">📋 入力内容の確認</div>
+      <div id="confirmRows"></div>
+      <div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b" id="confirmDepts"></div>
+      <div class="notice-box" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8">
+        ✓ 送信後、スプレッドシートの既存データの次の行に自動追記されます（経理入力列は空欄）
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button class="btn-ghost" onclick="goBack()">← 修正する</button>
+        <button class="btn-blue" id="submitBtn" onclick="submitForm()">申請・通知する 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 完了 ━━━ -->
+  <div id="view-sent" class="hidden">
+    <div class="card" style="text-align:center;padding:44px 24px">
+      <div class="success-ring"><span style="font-size:30px;color:#22c55e">✓</span></div>
+      <h2 style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:8px">申請完了</h2>
+      <p style="color:#475569;margin-bottom:6px" id="sentMsg"></p>
+      <p style="font-size:13px;color:#94a3b8;margin-bottom:24px">スプレッドシートに追記・各部署へ通知済み</p>
+      <button class="btn-blue" onclick="resetForm()">続けて新規登録する</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 補助科目（販売先）の選択肢
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SUBSIDIARY_OPTIONS = [
+  "(株)さとふる",
+  "ﾚｯﾄﾞﾎｰｽｺｰﾎﾟﾚｰｼｮﾝ(株)",
+  "ｼﾌﾄﾌﾟﾗｽ(株)",
+  "(株)JTB",
+  "Scale-UP(株)",
+  "ARUPA",
+  "(株)ｻｲﾊﾞｰﾚｺｰﾄﾞ",
+  "(株)ｱｰｽｺｰﾎﾟﾚｰｼｮﾝ",
+  "(株)ﾊﾟﾝｸﾁｭｱﾙ",
+  "(株)ﾛｰｶﾙ",
+  "(株)新潮ﾌﾟﾚｽ",
+  "NE(株)",
+  "中央ｺﾝﾋﾟｭｰﾀｰ_略(株)",
+  "ｽﾁｰﾑｼｯﾌﾟ(株)",
+  "(株)ﾌｭｰﾁｬｰﾘﾝｸﾈｯﾄﾜｰｸ",
+  "(株)全農ECｿﾘｭｰｼｮﾝｽﾞ",
+  "中間なし（doシステム）",
+];
+
+// 販売先ごとの自動入力データ
+const AUTOFILL_MAP = {
+  "(株)さとふる": {
+    loginUrl: "https://partner.satofull.jp/login",
+    id1: "portal_prod",
+    pw1: "YpN8PkGGAV",
+  },
+  "(株)JTB": {
+    loginUrl: "https://furu-po.com/BIZ/",
+    id1: "furupo-system",
+    pw1: "Furusato@2024@",
+  },
+  "ﾚｯﾄﾞﾎｰｽｺｰﾎﾟﾚｰｼｮﾝ(株)": {
+    loginUrl: "https://rhs-sys.jp/auth/",
+    id1: "",
+    pw1: "",
+  },
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// フィールド定義（A〜R列）
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const FIELDS = [
+  { key:"municipalityName", col:"A", label:"自治体名",         required:true,  type:"text",     placeholder:"例：〇〇市、〇〇町",       hint:"市区町村名を入力" },
+  { key:"accountName",      col:"B", label:"登録名（現状）",   required:true,  type:"text",     placeholder:"例：北国からの贈り物〜フィウィター", hint:"アカウント名をそのまま入力" },
+  { key:"department",       col:"C", label:"対象部門",         required:false, type:"text",     placeholder:"確認中" },
+  { key:"project",          col:"D", label:"プロジェクト",     required:false, type:"text",     placeholder:"確認中" },
+  { key:"subsidiarySales",  col:"E", label:"補助科目（販売先）",required:true,  type:"subsidiary", hint:"選択肢にない場合は「その他」を選んで直接入力" },
+  { key:"subdomain2",       col:"G", label:"サブドメイン2",    required:true,  type:"select",   options:["食品","酒類","雑貨・日用品"] },
+  { key:"taxRate",          col:"J", label:"消費税",           required:true,  type:"select",   options:["8%","10%"] },
+  { key:"bankAccount",      col:"K", label:"入金口座",         required:true,  type:"select",   options:["PayPay KG物販","楽天JFG総合","常陽SD売上"] },
+  { key:"loginUrl",         col:"M", label:"ログインURL",      required:true,  type:"url",      placeholder:"https://" },
+  { key:"id1",              col:"N", label:"ID1",              required:true,  type:"text",     placeholder:"ログインID" },
+  { key:"pw1",              col:"O", label:"PW1",              required:true,  type:"password", placeholder:"パスワード" },
+  { key:"id2",              col:"P", label:"ID2",              required:false, type:"text",     placeholder:"サイトによる（任意）" },
+  { key:"pw2",              col:"Q", label:"PW2",              required:false, type:"password", placeholder:"サイトによる（任意）" },
+  { key:"notes",            col:"R", label:"備考欄",           required:false, type:"select",   options:["","allへワンパス","メール受信"], hint:"空欄の場合はそのまま送信" },
+];
+
+const REQUIRED_FIELDS = FIELDS.filter(f => f.required);
+
+const DEPTS = [
+  { id:"sales",      label:"営業部" },
+  { id:"cs",         label:"CS部" },
+  { id:"accounting", label:"経理部" },
+  { id:"creative",   label:"制作部" },
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 状態管理
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let formData = {};
+let selectedDepts = ["sales","cs","accounting","creative"];
+let showPw = {};
+
+let gasUrl = localStorage.getItem("gasUrl") || "";
+let deptEmails = {};
+try { deptEmails = JSON.parse(localStorage.getItem("deptEmails") || "{}"); } catch(e) {}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 初期化
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function init() {
+  renderDeptChips();
+  renderSalesFields();
+  renderDeptEmailSettings();
+  document.getElementById("gasUrlInput").value = gasUrl;
+  updateProgress();
+}
+
+// 部署チェックボックス
+function renderDeptChips() {
+  const container = document.getElementById("deptChips");
+  container.innerHTML = DEPTS.map(d => `
+    <div class="dept-chip ${selectedDepts.includes(d.id) ? 'on' : ''}" onclick="toggleDept('${d.id}')" id="chip-${d.id}">
+      <div class="chk ${selectedDepts.includes(d.id) ? 'on' : ''}" id="chk-${d.id}">${selectedDepts.includes(d.id) ? '✓' : ''}</div>
+      <span style="font-size:14px;color:${selectedDepts.includes(d.id) ? '#1d4ed8' : '#475569'};font-weight:${selectedDepts.includes(d.id) ? 600 : 400}" id="chipLabel-${d.id}">${d.label}</span>
+      ${deptEmails[d.id] ? '<span style="margin-left:auto;font-size:11px;color:#94a3b8">📧 設定済</span>' : ''}
+    </div>`).join('');
+}
+
+function toggleDept(id) {
+  if (selectedDepts.includes(id)) {
+    selectedDepts = selectedDepts.filter(x => x !== id);
+  } else {
+    selectedDepts.push(id);
+  }
+  renderDeptChips();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 補助科目（販売先）専用レンダリング
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSubsidiaryField(f) {
+  return `<div id="wrap-${f.key}">
+    <div class="lbl">
+      <span class="badge-col">${f.col}</span>
+      ${f.label}
+      ${f.required ? '<span class="badge-req">必須</span>' : ''}
+    </div>
+    <div class="subsidiary-wrap">
+      <div class="subsidiary-select-row">
+        <select class="fi" id="field-${f.key}-select" onchange="onSubsidiarySelectChange()">
+          <option value="">選択してください</option>
+          ${SUBSIDIARY_OPTIONS.map(o => `<option value="${o}">${o}</option>`).join('')}
+          <option value="__other__">その他（直接入力）</option>
+        </select>
+      </div>
+      <div id="subsidiary-other-wrap" class="hidden">
+        <input class="fi" type="text" id="field-${f.key}-other"
+          placeholder="販売先名を直接入力"
+          oninput="onSubsidiaryOtherInput()"
+          style="margin-top:2px">
+        <div class="hint" style="color:#7c3aed">⌨️ 選択肢にない販売先を直接入力してください</div>
+      </div>
+      <div id="subsidiary-autofill-notice" class="hidden">
+        <span class="autofill-badge">⚡ ログインURL・IDを自動入力しました</span>
+      </div>
+    </div>
+    ${f.hint ? `<div class="hint">${f.hint}</div>` : ''}
+    <div class="err-msg hidden" id="err-${f.key}">⚠ ${f.label}は必須項目です</div>
+  </div>`;
+}
+
+// 補助科目セレクト変更
+function onSubsidiarySelectChange() {
+  const sel = document.getElementById("field-subsidiarySales-select");
+  const otherWrap = document.getElementById("subsidiary-other-wrap");
+  const otherInput = document.getElementById("field-subsidiarySales-other");
+  const autofillNotice = document.getElementById("subsidiary-autofill-notice");
+  const val = sel.value;
+
+  // その他表示切替
+  if (val === "__other__") {
+    otherWrap.classList.remove("hidden");
+    otherInput.value = "";
+    formData["subsidiarySales"] = "";
+    autofillNotice.classList.add("hidden");
+  } else {
+    otherWrap.classList.add("hidden");
+    formData["subsidiarySales"] = val;
+
+    // 自動入力
+    if (val && AUTOFILL_MAP[val]) {
+      const af = AUTOFILL_MAP[val];
+      if (af.loginUrl !== undefined) setFieldValue("loginUrl", af.loginUrl);
+      if (af.id1 !== undefined)      setFieldValue("id1", af.id1);
+      if (af.pw1 !== undefined)      setFieldValue("pw1", af.pw1);
+      autofillNotice.classList.remove("hidden");
+    } else {
+      autofillNotice.classList.add("hidden");
+    }
+  }
+
+  // エラークリア
+  document.getElementById("field-subsidiarySales-select").classList.remove("err");
+  document.getElementById("err-subsidiarySales").classList.add("hidden");
+  updateProgress();
+}
+
+// その他テキスト入力
+function onSubsidiaryOtherInput() {
+  const otherInput = document.getElementById("field-subsidiarySales-other");
+  formData["subsidiarySales"] = otherInput.value;
+  document.getElementById("err-subsidiarySales").classList.add("hidden");
+  updateProgress();
+}
+
+// フィールドに値をセットするヘルパー
+function setFieldValue(key, value) {
+  const el = document.getElementById("field-" + key);
+  if (el) {
+    el.value = value;
+    formData[key] = value;
+    el.classList.remove("err");
+    const err = document.getElementById("err-" + key);
+    if (err) err.classList.add("hidden");
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 営業入力フィールド描画
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSalesFields() {
+  const container = document.getElementById("salesFields");
+  container.innerHTML = FIELDS.map(f => {
+    // 補助科目（販売先）は専用レンダリング
+    if (f.type === "subsidiary") return renderSubsidiaryField(f);
+
+    let input = "";
+    if (f.type === "select") {
+      input = `<select class="fi" id="field-${f.key}" onchange="onFieldChange('${f.key}')">
+        <option value="">選択してください</option>
+        ${(f.options || []).map(o => `<option value="${o}">${o || '（備考なし）'}</option>`).join('')}
+      </select>`;
+    } else if (f.type === "password") {
+      input = `<div class="pw-wrap">
+        <input class="fi" type="password" id="field-${f.key}" placeholder="${f.placeholder || ''}" oninput="onFieldChange('${f.key}')" autocomplete="new-password" style="padding-right:40px">
+        <button class="pw-btn" type="button" onclick="togglePw('${f.key}')" id="pwbtn-${f.key}">👁️</button>
+      </div>`;
+    } else {
+      input = `<input class="fi" type="${f.type || 'text'}" id="field-${f.key}" placeholder="${f.placeholder || ''}" oninput="onFieldChange('${f.key}')">`;
+    }
+    return `<div id="wrap-${f.key}">
+      <div class="lbl">
+        <span class="badge-col">${f.col}</span>
+        ${f.label}
+        ${f.required ? '<span class="badge-req">必須</span>' : ''}
+      </div>
+      ${input}
+      ${f.hint ? `<div class="hint">${f.hint}</div>` : ''}
+      <div class="err-msg hidden" id="err-${f.key}">⚠ ${f.label}は必須項目です</div>
+    </div>`;
+  }).join('');
+}
+
+// 設定画面の部署メール入力
+function renderDeptEmailSettings() {
+  const container = document.getElementById("deptEmailSettings");
+  container.innerHTML = DEPTS.map(d => `
+    <div style="margin-bottom:14px">
+      <div class="lbl">${d.label}</div>
+      <input class="fi" type="email" id="email-${d.id}" placeholder="${d.label}の代表メールアドレス" value="${deptEmails[d.id] || ''}" style="font-size:13px">
+    </div>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// イベントハンドラ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function onFieldChange(key) {
+  const el = document.getElementById("field-" + key);
+  formData[key] = el.value;
+  el.classList.remove("err");
+  document.getElementById("err-" + key).classList.add("hidden");
+  updateProgress();
+}
+
+function togglePw(key) {
+  const input = document.getElementById("field-" + key);
+  const btn   = document.getElementById("pwbtn-" + key);
+  showPw[key] = !showPw[key];
+  input.type = showPw[key] ? "text" : "password";
+  btn.textContent = showPw[key] ? "🙈" : "👁️";
+}
+
+function updateProgress() {
+  const filled = REQUIRED_FIELDS.filter(f => {
+    if (f.key === "subsidiarySales") {
+      return (formData["subsidiarySales"] || "").trim() !== "";
+    }
+    const el = document.getElementById("field-" + f.key);
+    return el && el.value.trim() !== "";
+  }).length;
+  const total = REQUIRED_FIELDS.length;
+  const pct = Math.round(filled / total * 100);
+  document.getElementById("progressBar").style.width = pct + "%";
+  const lbl = document.getElementById("progressLabel");
+  lbl.textContent = filled + " / " + total + " 完了";
+  lbl.style.color = pct === 100 ? "#16a34a" : "#3b82f6";
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 設定
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openSettings()  { document.getElementById("drawer").style.transform = "translateX(0)"; document.getElementById("overlay").classList.remove("hidden"); }
+function closeSettings() { document.getElementById("drawer").style.transform = "translateX(105%)"; document.getElementById("overlay").classList.add("hidden"); }
+
+function saveSettings() {
+  gasUrl = document.getElementById("gasUrlInput").value.trim();
+  DEPTS.forEach(d => { deptEmails[d.id] = document.getElementById("email-" + d.id).value.trim(); });
+  localStorage.setItem("gasUrl", gasUrl);
+  localStorage.setItem("deptEmails", JSON.stringify(deptEmails));
+  renderDeptChips();
+  closeSettings();
+  alert("✅ 設定を保存しました");
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// バリデーション → 確認画面
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function validate() {
+  let valid = true;
+  let firstErrEl = null;
+
+  REQUIRED_FIELDS.forEach(f => {
+    if (f.key === "subsidiarySales") {
+      const val = (formData["subsidiarySales"] || "").trim();
+      if (!val) {
+        const sel = document.getElementById("field-subsidiarySales-select");
+        sel.classList.add("err");
+        document.getElementById("err-subsidiarySales").classList.remove("hidden");
+        if (!firstErrEl) firstErrEl = sel;
+        valid = false;
+      }
+      return;
+    }
+    const el = document.getElementById("field-" + f.key);
+    if (!el.value.trim()) {
+      el.classList.add("err");
+      document.getElementById("err-" + f.key).classList.remove("hidden");
+      if (!firstErrEl) firstErrEl = el;
+      valid = false;
+    }
+  });
+
+  if (!valid && firstErrEl) {
+    firstErrEl.scrollIntoView({ behavior:"smooth", block:"center" });
+    document.getElementById("globalError").classList.remove("hidden");
+  } else {
+    document.getElementById("globalError").classList.add("hidden");
+  }
+  return valid;
+}
+
+function goConfirm() {
+  // 現在の値をformDataに同期
+  FIELDS.forEach(f => {
+    if (f.key === "subsidiarySales") return; // 既にformData管理済み
+    const el = document.getElementById("field-" + f.key);
+    formData[f.key] = el ? el.value : "";
+  });
+  if (!validate()) return;
+
+  const rows = FIELDS.map(f => {
+    const val = formData[f.key];
+    const display = f.type === "password" ? (val ? "••••••••" : "—") : (val || "—");
+    const isEmpty = !val;
+    return `<div class="confirm-row">
+      <span class="cr-col">${f.col}</span>
+      <span class="cr-lbl">${f.label}${f.required ? '<span style="color:#ef4444;font-size:9px;margin-left:3px">*</span>' : ''}</span>
+      <span class="cr-val ${isEmpty ? 'empty' : ''}">${isEmpty ? '—' : display}</span>
+    </div>`;
+  }).join('');
+  document.getElementById("confirmRows").innerHTML = rows;
+
+  const deptNames = selectedDepts.map(id => DEPTS.find(d => d.id === id)?.label).join("、");
+  document.getElementById("confirmDepts").innerHTML = "📢 通知先: " + (deptNames || "未選択");
+
+  showView("confirm");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function goBack() { showView("form"); window.scrollTo({ top:0, behavior:"smooth" }); }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 送信
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function submitForm() {
+  if (!gasUrl) { alert("⚙️ 設定からGAS WebアプリURLを入力してください"); return; }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "送信中...";
+
+  const depts = selectedDepts.map(id => ({
+    label: DEPTS.find(d => d.id === id)?.label,
+    email: deptEmails[id] || "",
+  }));
+
+  const payload = { ...formData, departments: depts };
+
+  try {
+    await fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    document.getElementById("sentMsg").textContent =
+      (formData.municipalityName || "") + " / " + (formData.accountName || "") + " を登録しました";
+    showView("sent");
+    window.scrollTo({ top:0, behavior:"smooth" });
+  } catch(e) {
+    alert("送信エラー: " + e.message + "\n\nGAS URLが正しいか確認してください。");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "申請・通知する 🚀";
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// リセット
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function resetForm() {
+  formData = {};
+  FIELDS.forEach(f => {
+    if (f.key === "subsidiarySales") {
+      const sel = document.getElementById("field-subsidiarySales-select");
+      if (sel) { sel.value = ""; sel.classList.remove("err"); }
+      const other = document.getElementById("field-subsidiarySales-other");
+      if (other) other.value = "";
+      document.getElementById("subsidiary-other-wrap").classList.add("hidden");
+      document.getElementById("subsidiary-autofill-notice").classList.add("hidden");
+      return;
+    }
+    const el = document.getElementById("field-" + f.key);
+    if (el) { el.value = ""; el.classList.remove("err"); }
+    const err = document.getElementById("err-" + f.key);
+    if (err) err.classList.add("hidden");
+  });
+  document.getElementById("globalError").classList.add("hidden");
+  updateProgress();
+  showView("form");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 画面切り替え
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showView(name) {
+  ["form","confirm","sent"].forEach(v => {
+    document.getElementById("view-" + v).classList.toggle("hidden", v !== name);
+  });
+}
+
+// 起動
+init();
+</script>
+</body>
+</html>
