@@ -253,16 +253,15 @@ const REQUIRED_FIELDS = FIELDS.filter(f => f.required);
 
 const DEPTS = [
   { id:"sales",      label:"営業部" },
-  { id:"cs",         label:"CS部" },
-  { id:"accounting", label:"経理部" },
-  { id:"creative",   label:"制作部" },
+  { id:"accounting", label:"経理" },
+  { id:"bizdev",     label:"業務推進" },
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 状態管理
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let formData = {};
-let selectedDepts = ["sales","cs","accounting","creative"];
+let selectedDepts = ["sales","accounting","bizdev"];
 let showPw = {};
 
 let gasUrl = "https://script.google.com/macros/s/AKfycbw2hc_AL7RlNva3a5K16KFV9vbr602DgPzA-jL0tIEZl8DY87BA1v6L6krqgMZPUw4e/exec";
